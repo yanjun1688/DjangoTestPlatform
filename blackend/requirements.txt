@@ -1,0 +1,6 @@
+Django>=3.2
+djangorestframework
+django-reversion
+django-mptt
+requests
+django-cors-headers 

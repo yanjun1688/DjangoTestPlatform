@@ -1,0 +1,10 @@
+.homepage-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 在 Sider 内部垂直居中 */
+  align-items: center;     /* 在 Sider 内部水平居中 */
+  height: 100%;            /* 关键：让它填充父元素（Sider 的内容区域）的高度 */
+  width: 100%;             /* 填充父元素的宽度 */
+  text-align: center;
+  padding: 20px;
+}
