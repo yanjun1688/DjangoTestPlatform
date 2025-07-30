@@ -1,0 +1,193 @@
+/* 通知中心样式 */
+.notification-bell {
+  color: #666;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.notification-bell:hover {
+  color: #1890ff;
+}
+
+/* 通知下拉框 */
+.notification-dropdown-overlay .ant-dropdown-menu {
+  padding: 0;
+  max-height: none;
+}
+
+.notification-dropdown {
+  width: 350px;
+  max-height: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.notification-dropdown .ant-card-head {
+  padding: 12px 16px;
+  min-height: auto;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-dropdown .ant-card-body {
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 通知头部 */
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.notification-header span {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.notification-header .ant-btn.active {
+  color: #1890ff;
+  background-color: #e6f7ff;
+}
+
+/* 通知内容区 */
+.notification-content {
+  width: 100%;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 20px;
+}
+
+/* 通知列表 */
+.notification-list {
+  margin: 0;
+}
+
+.notification-list .ant-list-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin: 0;
+}
+
+.notification-list .ant-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.notification-list .ant-list-item:last-child {
+  border-bottom: none;
+}
+
+/* 通知项 */
+.notification-item.unread {
+  background-color: #f6ffed;
+  border-left: 3px solid #52c41a;
+}
+
+.notification-item.unread:hover {
+  background-color: #f0f9ff;
+}
+
+.notification-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.actor-name {
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.verb-text {
+  color: #666;
+}
+
+.unread-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #ff4d4f;
+  border-radius: 50%;
+  margin-left: 4px;
+}
+
+.notification-description {
+  color: #666;
+  font-size: 12px;
+}
+
+.target-name {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.action-content {
+  color: #999;
+  font-style: italic;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-time {
+  color: #999;
+  font-size: 11px;
+}
+
+/* 通知操作区 */
+.notification-actions {
+  padding: 8px 16px;
+  text-align: center;
+}
+
+.notification-actions .ant-btn {
+  color: #666;
+}
+
+.notification-actions .ant-btn:hover {
+  color: #1890ff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .notification-dropdown {
+    width: 300px;
+  }
+  
+  .notification-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .notification-list .ant-list-item {
+    padding: 10px 12px;
+  }
+}
+
+/* 滚动条样式 */
+.notification-dropdown .ant-card-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-dropdown .ant-card-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.notification-dropdown .ant-card-body::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.notification-dropdown .ant-card-body::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -1,75 +1,223 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import API_CONFIG from './config/api';
+import ErrorHandler from './utils/errorHandler';
+import NotificationCenter from './components/NotificationCenter';
+import ThemeProvider from './components/ThemeProvider';
+import ThemeToggle from './components/ThemeToggle';
 import TestCasePage from './pages/TestCasePage';
-import TestSuitePage from './pages/TestSuitePage';
 import TestResultPage from './pages/TestResultPage';
 import ApiDefinitionPage from './pages/ApiDefinitionPage';
-import { Layout, Typography, Flex, Button } from 'antd';
-// import './HomePage.css'; // No longer needed for this layout
+import DebugPage from './pages/DebugPage';
+import LoginPage from './pages/LoginPage';
+import UserManagementPage from './pages/UserManagementPage';
+import DashboardPage from './pages/DashboardPage';
+import ReportListPage from './pages/ReportListPage';
+import TestPlanPage from './pages/TestPlanPage';
+import TestReportPage from './pages/TestReportPage';
+import MockServerPage from './pages/MockServerPage';
+import InteractiveTestEditor from './pages/InteractiveTestEditor';
+import EnvironmentManagePage from './pages/EnvironmentManagePage';
+import TestFlowOrchestrationPage from './pages/TestFlowOrchestrationPage';
+import EnhancedTestReportPage from './pages/EnhancedTestReportPage';
+import './App.css';
+import './styles/theme.css';
 
-const { Content } = Layout;
-const { Title } = Typography;
+// 路由保护组件
+const ProtectedRoute = ({ children, user }) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
-function App() {
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  user: PropTypes.object
+};
+
+// 管理员路由保护组件
+const AdminRoute = ({ children, user }) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  if (!user.is_admin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+};
+
+AdminRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  user: PropTypes.object
+};
+
+// 主应用组件
+const AppContent = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await axios.get(`${API_CONFIG.BASE_URL}/api/user/auth/check_auth/`, {
+        withCredentials: true
+      });
+      if (response.data.authenticated) {
+        setUser(response.data.user);
+      }
+    } catch (error) {
+      console.log('Auth check failed:', error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.get('/api/user/auth/logout/');
+      setUser(null);
+      navigate('/login');
+      ErrorHandler.showSuccess('已成功退出登录');
+    } catch (error) {
+      ErrorHandler.handleApiError(error, '退出登录失败');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>加载中...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="app">
+        <Routes>
+          <Route path="/login" element={<LoginPage setUser={setUser} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
-    <Router>
-      {/* Main Layout - provides basic structure for other routes */} 
-      <Layout style={{ minHeight: '100vh' }}>
-        {/* Content area for other routes - minimal padding */} 
-        <Content style={{ padding: 0 }}>
-          <Routes>
-            {/* Home Page route: Absolute positioned container for full viewport centering */} 
-            <Route 
-              path="/"
-              element={
-                <div style={{
-                  position: 'absolute', /* Absolute positioning */
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  textAlign: 'center', /* Center inline content */
-                  padding: '20px', /* Add some padding */
-                  backgroundColor: '#f0f2f5' /* Optional: Add a background color */
-                }}>
-                  {/* Centered Platform Name */} 
-                  <Title level={1} style={{ marginBottom: '40px' }}>Django Test Platform</Title>
-                  
-                  {/* Navigation buttons with spacing and styling */} 
-                  {/* Flex container for buttons, centered horizontally within the div */} 
-                  <Flex vertical gap="middle" align="center" style={{ width: '100%', maxWidth: '400px' }}> 
-                    <Button type="primary" size="large" block>
-                      <Link to="/test-cases" style={{ color: 'inherit' }}>Test Cases</Link>
-                    </Button>
-                    <Button type="primary" size="large" block>
-                      <Link to="/test-suites" style={{ color: 'inherit' }}>Test Suites</Link>
-                    </Button>
-                    <Button type="primary" size="large" block>
-                      <Link to="/test-results" style={{ color: 'inherit' }}>Test Results</Link>
-                    </Button>
-                    <Button type="primary" size="large" block>
-                      <Link to="/api-definitions" style={{ color: 'inherit' }}>API Definitions</Link>
-                    </Button>
-                  </Flex>
-                </div>
-              }
-            />
-
-            {/* Routes for other components - they will render within the Content area */} 
-            <Route path="/test-cases" element={<TestCasePage />} />
-            <Route path="/test-suites" element={<TestSuitePage />} />
-            <Route path="/test-results" element={<TestResultPage />} />
-            <Route path="/api-definitions" element={<ApiDefinitionPage />} />
-          </Routes>
-        </Content>
-        {/* Optional Footer */}
-        {/* <Layout.Footer style={{ textAlign: 'center' }}>Ant Design ©2023 Created by Ant UED</Layout.Footer> */} 
-      </Layout>
-    </Router>
+    <div className="app">
+      <header className="app-header">
+        <div className="header-content">
+          <h1>API测试平台</h1>
+          <div className="user-info">
+            <NotificationCenter currentUser={user} />
+            <ThemeToggle />
+            <span className="username">
+              {user.first_name || user.username}
+              {user.is_admin && <span className="admin-badge">管理员</span>}
+            </span>
+            <button onClick={handleLogout} className="logout-btn">
+              退出登录
+            </button>
+          </div>
+        </div>
+      </header>
+      <main className="app-main">
+        <Routes>
+          <Route path="/dashboard" element={
+            <ProtectedRoute user={user}>
+              <DashboardPage user={user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/test-results" element={
+            <ProtectedRoute user={user}>
+              <TestResultPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/api-definitions" element={
+            <ProtectedRoute user={user}>
+              <ApiDefinitionPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/debug" element={
+            <ProtectedRoute user={user}>
+              <DebugPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/user-management" element={
+            <AdminRoute user={user}>
+              <UserManagementPage />
+            </AdminRoute>
+          } />
+          <Route path="/reports" element={
+            <ProtectedRoute user={user}>
+              <ReportListPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/reports/:runId" element={
+            <ProtectedRoute user={user}>
+              <TestReportPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/test-plans" element={
+            <ProtectedRoute user={user}>
+              <TestPlanPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/test-cases" element={
+            <ProtectedRoute user={user}>
+              <TestCasePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/interactive-editor" element={
+            <ProtectedRoute user={user}>
+              <InteractiveTestEditor />
+            </ProtectedRoute>
+          } />
+          <Route path="/environments" element={
+            <ProtectedRoute user={user}>
+              <EnvironmentManagePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/workflow-orchestration" element={
+            <ProtectedRoute user={user}>
+              <TestFlowOrchestrationPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/enhanced-reports/:runId" element={
+            <ProtectedRoute user={user}>
+              <EnhancedTestReportPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/mock-server" element={
+            <ProtectedRoute user={user}>
+              <MockServerPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </main>
+    </div>
   );
-}
+};
+
+// 根App组件
+const App = () => {
+  return (
+    <ThemeProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </ThemeProvider>
+  );
+};
 
 export default App;

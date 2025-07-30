@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试报告 - {{ test_run.name }}</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header .subtitle {
+            margin-top: 10px;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .summary-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .summary-card .label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .passed { color: #28a745; }
+        .failed { color: #dc3545; }
+        .error { color: #ffc107; }
+        .total { color: #007bff; }
+        
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-passed {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-error {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .response-time {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .test-info {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .test-info .row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .test-info .label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #495057;
+        }
+        .test-info .value {
+            color: #212529;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                font-size: 12px;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .header {
+                background: #667eea !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>测试执行报告</h1>
+            <div class="subtitle">{{ test_run.name }}</div>
+        </div>
+        
+        <div class="summary">
+            <div class="summary-card">
+                <div class="number total">{{ summary.total_tests }}</div>
+                <div class="label">总用例数</div>
+            </div>
+            <div class="summary-card">
+                <div class="number passed">{{ summary.passed_tests }}</div>
+                <div class="label">通过</div>
+            </div>
+            <div class="summary-card">
+                <div class="number failed">{{ summary.failed_tests }}</div>
+                <div class="label">失败</div>
+            </div>
+            <div class="summary-card">
+                <div class="number error">{{ summary.error_tests }}</div>
+                <div class="label">错误</div>
+            </div>
+            <div class="summary-card">
+                <div class="number total">{{ summary.success_rate|floatformat:1 }}%</div>
+                <div class="label">成功率</div>
+            </div>
+            <div class="summary-card">
+                <div class="number total">{{ summary.duration }}</div>
+                <div class="label">执行时长</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>测试信息</h2>
+                <div class="test-info">
+                    <div class="row">
+                        <span class="label">测试计划:</span>
+                        <span class="value">{{ test_run.test_plan.name|default:"无" }}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">执行者:</span>
+                        <span class="value">{{ test_run.executed_by.username|default:"系统" }}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">开始时间:</span>
+                        <span class="value">{{ test_run.start_time|date:"Y-m-d H:i:s" }}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">结束时间:</span>
+                        <span class="value">{{ test_run.end_time|date:"Y-m-d H:i:s"|default:"未完成" }}</span>
+                    </div>
+                    <div class="row">
+                        <span class="label">执行状态:</span>
+                        <span class="value">{{ test_run.get_status_display }}</span>
+                    </div>
+                    {% if test_run.description %}
+                    <div class="row">
+                        <span class="label">描述:</span>
+                        <span class="value">{{ test_run.description }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>详细结果</h2>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>测试用例</th>
+                            <th>API</th>
+                            <th>方法</th>
+                            <th>状态</th>
+                            <th>状态码</th>
+                            <th>响应时间</th>
+                            <th>执行时间</th>
+                            <th>错误信息</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.test_case.name }}</td>
+                            <td>{{ result.test_case.api.name }}</td>
+                            <td>
+                                <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; font-family: monospace;">
+                                    {{ result.test_case.api.method }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ result.status }}">
+                                    {{ result.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if result.response_code %}
+                                    <span class="response-time">{{ result.response_code }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if result.response_time %}
+                                    <span class="response-time">{{ result.response_time|floatformat:2 }}ms</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ result.executed_at|date:"H:i:s" }}</td>
+                            <td>
+                                {% if result.error_message %}
+                                    <span style="color: #dc3545; font-size: 0.9em;">{{ result.error_message|truncatechars:50 }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px; color: #666;">
+                                暂无测试结果
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if results %}
+            <div class="section">
+                <h2>失败用例详情</h2>
+                {% for result in results %}
+                    {% if result.status == 'failed' or result.status == 'error' %}
+                    <div style="background: #f8f9fa; border-left: 4px solid #dc3545; padding: 15px; margin-bottom: 15px; border-radius: 0 4px 4px 0;">
+                        <h4 style="margin-top: 0; color: #dc3545;">{{ result.test_case.name }}</h4>
+                        <p><strong>API:</strong> {{ result.test_case.api.method }} {{ result.test_case.api.name }}</p>
+                        <p><strong>URL:</strong> {{ result.test_case.api.url }}</p>
+                        <p><strong>错误信息:</strong> {{ result.error_message|default:"无" }}</p>
+                        {% if result.response_body %}
+                        <p><strong>响应内容:</strong></p>
+                        <pre style="background: white; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.9em;">{{ result.response_body|truncatechars:500 }}</pre>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="footer">
+            <p>报告生成时间: {% now "Y-m-d H:i:s" %} | Django测试平台自动生成</p>
+        </div>
+    </div>
+</body>
+</html>

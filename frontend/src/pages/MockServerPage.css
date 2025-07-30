@@ -1,0 +1,177 @@
+.mock-server-page {
+  .mock-url-display {
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  .method-tag {
+    font-weight: bold;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .status-code-tag {
+    font-weight: bold;
+    min-width: 45px;
+    text-align: center;
+  }
+
+  .mock-stats-card {
+    .ant-statistic-content {
+      display: flex;
+      align-items: center;
+    }
+
+    .ant-statistic-content-prefix {
+      margin-right: 8px;
+    }
+  }
+
+  .json-editor {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+  }
+
+  .curl-command {
+    background: #1f1f1f;
+    color: #f8f8f2;
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .mock-test-section {
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    background: #fafafa;
+
+    .section-title {
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #262626;
+    }
+  }
+
+  .request-log-table {
+    .ant-table-tbody > tr:hover > td {
+      background: #f5f5f5 !important;
+    }
+  }
+
+  .mock-api-preview {
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    background: #fff;
+    
+    .preview-header {
+      background: #f0f0f0;
+      padding: 8px 12px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .preview-body {
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  }
+
+  .statistics-grid {
+    .ant-col {
+      margin-bottom: 16px;
+    }
+  }
+
+  .mock-form {
+    .ant-form-item-label > label {
+      font-weight: 500;
+    }
+
+    .path-input {
+      .ant-input-group-addon {
+        background: #f0f0f0;
+        color: #666;
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .action-buttons {
+    .ant-btn {
+      margin-right: 4px;
+    }
+  }
+
+  .status-badge {
+    &.active {
+      .ant-badge-status-dot {
+        background-color: #52c41a;
+      }
+    }
+
+    &.inactive {
+      .ant-badge-status-dot {
+        background-color: #d9d9d9;
+      }
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .mock-server-page {
+    .ant-table-scroll {
+      .ant-table-body {
+        overflow-x: auto;
+      }
+    }
+
+    .statistics-grid {
+      .ant-col {
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
+    }
+
+    .action-buttons {
+      .ant-btn {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .mock-server-page {
+    padding: 12px !important;
+
+    .statistics-grid {
+      .ant-col {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+
+    .ant-modal {
+      margin: 0;
+      max-width: 100vw;
+      top: 0;
+    }
+  }
+}

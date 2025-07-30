@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ApiDefinition, ApiTestCase, ApiTestResult, ApiTestSuite
+from .models import ApiDefinition, ApiTestCase, ApiTestResult
 
 @admin.register(ApiDefinition)
 class ApiDefinitionAdmin(admin.ModelAdmin):
@@ -17,11 +17,4 @@ class ApiTestCaseAdmin(admin.ModelAdmin):
 class ApiTestResultAdmin(admin.ModelAdmin):
     list_display = ('test_case', 'status', 'response_code', 'response_time', 'executed_by', 'executed_at')
     list_filter = ('status', 'executed_by')
-    search_fields = ('test_case__name', 'error_message')
-
-@admin.register(ApiTestSuite)
-class ApiTestSuiteAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created_by', 'created_at')
-    list_filter = ('created_by',)
-    search_fields = ('name', 'description')
-    filter_horizontal = ('test_cases',) 
+    search_fields = ('test_case__name', 'error_message') 

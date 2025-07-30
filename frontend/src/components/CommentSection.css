@@ -1,0 +1,158 @@
+/* 评论区整体样式 */
+.comment-section {
+  margin-top: 24px;
+}
+
+.comment-section .ant-card-head-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 新评论表单 */
+.new-comment-form {
+  margin-bottom: 16px;
+}
+
+.new-comment-actions {
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* 登录提示 */
+.login-prompt {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+/* 评论列表 */
+.comments-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.no-comments {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+  font-style: italic;
+}
+
+/* 评论项 */
+.comment-item {
+  margin-bottom: 12px;
+}
+
+.comment-reply {
+  border-left: 2px solid #f0f0f0;
+  padding-left: 12px;
+}
+
+.comment-card {
+  border: 1px solid #f0f0f0;
+  box-shadow: none;
+  transition: box-shadow 0.2s;
+}
+
+.comment-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 评论头部 */
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.comment-edited {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+/* 评论内容 */
+.comment-content {
+  margin-bottom: 8px;
+}
+
+.comment-text {
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.comment-text .mention {
+  color: #1890ff;
+  background-color: #e6f7ff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+/* 编辑表单 */
+.comment-edit-form {
+  margin-bottom: 8px;
+}
+
+.comment-edit-actions {
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* 评论操作 */
+.comment-actions {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 8px;
+}
+
+/* 回复表单 */
+.reply-form {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 6px;
+}
+
+.reply-actions {
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* 回复列表 */
+.comment-replies {
+  margin-top: 12px;
+  border-left: 2px solid #e6f7ff;
+  padding-left: 12px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .comment-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .comment-time {
+    margin-top: 4px;
+  }
+  
+  .comment-reply {
+    margin-left: 0;
+    padding-left: 8px;
+  }
+  
+  .comments-list {
+    max-height: 400px;
+  }
+}

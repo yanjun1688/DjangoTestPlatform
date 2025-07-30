@@ -1,0 +1,76 @@
+/* @提及输入组件样式 */
+.mention-input-container {
+  position: relative;
+}
+
+.mention-textarea {
+  resize: vertical;
+}
+
+/* 提及建议框 */
+.mention-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.mention-suggestions .ant-card-body {
+  padding: 4px 0;
+}
+
+.mention-suggestions .ant-list {
+  margin: 0;
+}
+
+.mention-suggestions .ant-list-item {
+  padding: 8px 12px;
+  margin: 0;
+  cursor: pointer;
+  border-bottom: none;
+  transition: background-color 0.2s;
+}
+
+.mention-suggestions .ant-list-item:hover,
+.mention-suggestions .suggestion-item.selected {
+  background-color: #f5f5f5;
+}
+
+.mention-suggestions .ant-list-item-meta {
+  margin-bottom: 0;
+}
+
+.mention-suggestions .ant-list-item-meta-title {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.mention-suggestions .ant-list-item-meta-description {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 滚动条样式 */
+.mention-suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mention-suggestions::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.mention-suggestions::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.mention-suggestions::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

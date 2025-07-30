@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ApiDefinition, ApiTestCase, ApiTestResult, ApiTestSuite
+from .models import ApiDefinition, ApiTestCase, ApiTestResult
 
 class ApiDefinitionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,15 +24,4 @@ class ApiTestResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApiTestResult
         fields = '__all__'
-        read_only_fields = ('executed_by', 'executed_at')
-
-class ApiTestSuiteSerializer(serializers.ModelSerializer):
-    test_cases_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ApiTestSuite
-        fields = '__all__'
-        read_only_fields = ('created_by', 'created_at', 'updated_at')
-
-    def get_test_cases_count(self, obj):
-        return obj.test_cases.count() 
+        read_only_fields = ('executed_by', 'executed_at') 

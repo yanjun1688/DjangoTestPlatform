@@ -1,0 +1,4 @@
+username,password,email
+test_user1,password123,user1@example.com
+test_user2,password456,user2@example.com
+admin_user,admin123,admin@example.com

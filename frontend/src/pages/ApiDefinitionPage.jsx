@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Typography, Table, Form, Input, Select, Button, Modal, Space, Tag, message } from 'antd';
+import Logger from '../utils/logger';
+import { compressJson } from '../utils/jsonUtils';
+import api from '../utils/api';
+import BackButton from '../components/BackButton';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -19,18 +22,20 @@ const ApiDefinitionPage = () => {
 
   const fetchApis = async () => {
     try {
-      // 修复：使用正确的API路径
-      const response = await axios.get('/api-test/api-definitions/');
+      Logger.info('Fetching API definitions...');
+      const response = await api.get('/api-test/api-definitions/');
+      Logger.debug('API definitions response:', response.data);
       setApis(Array.isArray(response.data) ? response.data : []);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching API definitions:', error);
+      Logger.errorWithContext('fetchApis', error);
       message.error('获取API定义失败');
       setLoading(false);
     }
   };
 
   const handleAdd = () => {
+    Logger.info('Opening add API definition modal');
     setEditingApi(null);
     form.resetFields();
     // 设置默认的JSON字符串值
@@ -43,6 +48,7 @@ const ApiDefinitionPage = () => {
   };
 
   const handleEdit = (record) => {
+    Logger.info('Opening edit API definition modal', { id: record.id });
     setEditingApi(record);
     
     // 修复：正确处理JSON字段
@@ -53,7 +59,8 @@ const ApiDefinitionPage = () => {
         // 如果是字符串，先解析再格式化
         const parsed = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
         return JSON.stringify(parsed, null, 2);
-      } catch (e) {
+      } catch (error) {
+        Logger.warn('Failed to format JSON for display:', error.message);
         return jsonStr || '{}';
       }
     };
@@ -72,12 +79,12 @@ const ApiDefinitionPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm('确定要删除这个API定义吗？')) {
       try {
-        // 修复：使用正确的删除路径
-        await axios.delete(`/api-test/api-definitions/${id}/`);
+        Logger.info('Deleting API definition', { id });
+        await api.delete(`/api-test/api-definitions/${id}/`);
         message.success('删除成功');
         fetchApis();
       } catch (error) {
-        console.error('Error deleting API definition:', error);
+        Logger.errorWithContext('handleDelete', error);
         message.error('删除失败');
       }
     }
@@ -92,7 +99,8 @@ const ApiDefinitionPage = () => {
         try {
           JSON.parse(value);
           return Promise.resolve();
-        } catch (e) {
+        } catch (error) {
+          Logger.warn(`JSON validation failed for ${fieldName}:`, error.message);
           return Promise.reject(new Error(`${fieldName} 必须是有效的JSON格式`));
         }
       },
@@ -102,40 +110,35 @@ const ApiDefinitionPage = () => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
+      Logger.formData('ApiDefinitionForm', values);
 
-      // 修复：正确处理JSON字段提交
-      // 确保提交的是有效的JSON字符串
-      const processJsonField = (value) => {
-        if (!value || value.trim() === '') return '{}';
-        try {
-          // 验证JSON格式并返回压缩的字符串
-          JSON.parse(value);
-          return value.trim();
-        } catch (e) {
-          throw new Error('JSON格式错误');
-        }
-      };
-
+      // 使用安全的JSON处理函数
       const submitValues = {
         ...values,
-        headers: processJsonField(values.headers),
-        params: processJsonField(values.params),
-        body: processJsonField(values.body),
+        headers: compressJson(values.headers),
+        params: compressJson(values.params),
+        body: compressJson(values.body),
       };
 
+      Logger.debug('Submit values:', submitValues);
+
       if (editingApi) {
-        await axios.put(`/api-test/api-definitions/${editingApi.id}/`, submitValues);
+        Logger.info('Updating API definition', { id: editingApi.id });
+        await api.put(`/api-test/api-definitions/${editingApi.id}/`, submitValues);
         message.success('更新成功');
       } else {
-        await axios.post('/api-test/api-definitions/', submitValues);
+        Logger.info('Creating new API definition');
+        await api.post('/api-test/api-definitions/', submitValues);
         message.success('创建成功');
       }
       setModalVisible(false);
       fetchApis();
     } catch (error) {
-      console.error('Error saving API definition:', error);
-      if (error.message === 'JSON格式错误') {
+      Logger.errorWithContext('handleModalOk', error);
+      if (error.message && error.message.includes('JSON格式错误')) {
         message.error('请检查JSON格式是否正确');
+      } else if (error.response?.data) {
+        message.error(`服务器错误: ${JSON.stringify(error.response.data)}`);
       } else {
         message.error('保存失败');
       }
@@ -153,8 +156,8 @@ const ApiDefinitionPage = () => {
       const parsed = typeof text === 'string' ? JSON.parse(text) : text;
       const keys = Object.keys(parsed);
       if (keys.length === 0) return '-';
-      return `{${keys.length} fields}`;
-    } catch (e) {
+      return `{${keys.length} 个字段}`;
+    } catch {
       return text;
     }
   };
@@ -204,111 +207,88 @@ const ApiDefinitionPage = () => {
       render: renderJsonField,
     },
     {
+      title: '参数',
+      dataIndex: 'params',
+      key: 'params',
+      width: 100,
+      render: renderJsonField,
+    },
+    {
+      title: '请求体',
+      dataIndex: 'body',
+      key: 'body',
+      width: 100,
+      render: renderJsonField,
+    },
+    {
       title: '描述',
       dataIndex: 'description',
       key: 'description',
-      width: 150,
       ellipsis: true,
-      render: (text) => text || '-',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      width: 150,
-      render: (text) => text ? new Date(text).toLocaleString() : '-',
     },
     {
       title: '操作',
       key: 'actions',
-      width: 120,
-      fixed: 'right',
+      width: 150,
       render: (text, record) => (
-        <Space size="small">
-          <Button type="link" size="small" onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Button type="link" size="small" danger onClick={() => handleDelete(record.id)}>
-            删除
-          </Button>
+        <Space size="middle">
+          <Button type="link" onClick={() => handleEdit(record)}>编辑</Button>
+          <Button type="link" danger onClick={() => handleDelete(record.id)}>删除</Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <div style={{ padding: '20px', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ 
-          background: '#fff', 
-          padding: '24px', 
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <Title level={2} style={{ margin: 0 }}>API定义管理</Title>
-            <Button type="primary" onClick={handleAdd}>
-              新增API定义
-            </Button>
-          </div>
-          
-          <Table 
-            columns={columns} 
-            dataSource={apis} 
-            rowKey="id" 
-            loading={loading}
-            pagination={{ 
-              pageSize: 10,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total) => `共 ${total} 条记录`
-            }}
-            scroll={{ x: 1200 }}
-          />
-        </div>
+    <div style={{ padding: '20px', minHeight: '100vh', backgroundColor: '#fff' }}>
+      <BackButton />
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        <Title level={2}>API 定义</Title>
+        <Button type="primary" onClick={handleAdd} style={{ marginBottom: '20px' }}>
+          添加新API定义
+        </Button>
+        <Table 
+          columns={columns} 
+          dataSource={apis} 
+          rowKey="id" 
+          loading={loading}
+          pagination={{ pageSize: 10 }}
+        />
 
         <Modal
-          title={editingApi ? '编辑API定义' : '新增API定义'}
+          title={editingApi ? '编辑API定义' : '添加新API定义'}
           visible={modalVisible}
           onOk={handleModalOk}
           onCancel={handleModalCancel}
-          width={700}
+          width={800}
           destroyOnClose
         >
           <Form
             form={form}
             layout="vertical"
-            preserve={false}
           >
             <Form.Item
               name="name"
-              label="接口名称"
-              rules={[
-                { required: true, message: '请输入接口名称' },
-                { max: 200, message: '接口名称不能超过200个字符' }
-              ]}
+              label="名称"
+              rules={[{ required: true, message: '请输入API名称' }]}
             >
-              <Input placeholder="请输入接口名称" />
+              <Input />
             </Form.Item>
-            
+
             <Form.Item
               name="url"
-              label="接口URL"
-              rules={[
-                { required: true, message: '请输入接口URL' },
-                { max: 500, message: 'URL不能超过500个字符' },
-                { type: 'url', message: '请输入有效的URL格式' }
-              ]}
+              label="URL"
+              rules={[{ required: true, message: '请输入API URL' }]}
             >
-              <Input placeholder="https://api.example.com/v1/users" />
+              <Input placeholder="https://api.example.com/endpoint" />
             </Form.Item>
-            
+
             <Form.Item
               name="method"
               label="请求方法"
               rules={[{ required: true, message: '请选择请求方法' }]}
             >
-              <Select placeholder="请选择请求方法">
+              <Select>
                 <Option value="GET">GET</Option>
                 <Option value="POST">POST</Option>
                 <Option value="PUT">PUT</Option>
@@ -316,18 +296,17 @@ const ApiDefinitionPage = () => {
                 <Option value="PATCH">PATCH</Option>
               </Select>
             </Form.Item>
-            
+
             <Form.Item
               name="module"
               label="所属模块"
-              rules={[{ max: 100, message: '模块名不能超过100个字符' }]}
             >
-              <Input placeholder="用户管理、订单管理等" />
+              <Input placeholder="例如：用户管理、订单系统等" />
             </Form.Item>
-            
+
             <Form.Item
               name="headers"
-              label="请求头 (JSON格式)"
+              label="请求头 (JSON)"
               rules={[validateJsonField('请求头')]}
             >
               <TextArea 
@@ -335,39 +314,34 @@ const ApiDefinitionPage = () => {
                 placeholder='{"Content-Type": "application/json", "Authorization": "Bearer token"}'
               />
             </Form.Item>
-            
+
             <Form.Item
               name="params"
-              label="URL参数 (JSON格式)"
+              label="URL参数 (JSON)"
               rules={[validateJsonField('URL参数')]}
             >
               <TextArea 
                 rows={4} 
-                placeholder='{"page": 1, "size": 10, "keyword": "search"}'
+                placeholder='{"page": 1, "size": 10}'
               />
             </Form.Item>
-            
+
             <Form.Item
               name="body"
-              label="请求体 (JSON格式)"
+              label="请求体 (JSON)"
               rules={[validateJsonField('请求体')]}
             >
               <TextArea 
                 rows={4} 
-                placeholder='{"name": "John", "email": "john@example.com"}'
+                placeholder='{"name": "test", "email": "test@example.com"}'
               />
             </Form.Item>
-            
+
             <Form.Item
               name="description"
-              label="接口描述"
+              label="描述"
             >
-              <TextArea 
-                rows={3} 
-                placeholder="请描述此接口的功能和用途"
-                maxLength={500}
-                showCount
-              />
+              <TextArea rows={3} placeholder="API的详细描述..." />
             </Form.Item>
           </Form>
         </Modal>
