@@ -28,4 +28,4 @@ coverage/
 *.swo
 
 # System
-Thumbs.db
+Thumbs.db.claude/ 
