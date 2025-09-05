@@ -1,0 +1,2 @@
+# user_management模块的模型测试已整合到test_views.py中
+# 这里可以添加其他特定的模型测试

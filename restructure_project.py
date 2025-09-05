@@ -34,8 +34,12 @@ class ProjectRestructurer:
         """彩色输出"""
         print(f"{color}{message}{Colors.END}")
     
-    def check_git_status(self):
+    def check_git_status(self, force=False):
         """检查Git状态"""
+        if force:
+            self.print_colored("🚀 强制模式，跳过Git检查", Colors.YELLOW)
+            return True
+            
         try:
             result = subprocess.run(['git', 'status', '--porcelain'], 
                                   capture_output=True, text=True, cwd=self.project_root)
@@ -388,7 +392,7 @@ VITE_ENABLE_DEBUG=true
         
         self.print_colored(f"📄 重构报告已生成: {report_path}", Colors.GREEN)
     
-    def run_restructure(self, dry_run=False):
+    def run_restructure(self, dry_run=False, force=False):
         """执行重构"""
         self.dry_run = dry_run
         
@@ -399,7 +403,7 @@ VITE_ENABLE_DEBUG=true
         
         try:
             # 检查Git状态
-            if not dry_run and not self.check_git_status():
+            if not dry_run and not self.check_git_status(force):
                 return False
             
             # 创建备份
@@ -441,11 +445,13 @@ def main():
                        help='预览模式，不实际修改文件')
     parser.add_argument('--execute', action='store_true',
                        help='执行实际重构')
+    parser.add_argument('--force', action='store_true',
+                       help='强制执行，跳过所有确认提示')
     
     args = parser.parse_args()
     
-    if not args.dry_run and not args.execute:
-        print("请指定 --dry-run（预览）或 --execute（执行）参数")
+    if not args.dry_run and not args.execute and not args.force:
+        print("请指定 --dry-run（预览）、--execute（执行）或 --force（强制执行）参数")
         return 1
     
     project_root = os.path.abspath(args.project_root)
@@ -455,6 +461,9 @@ def main():
     
     if args.dry_run:
         success = restructurer.run_restructure(dry_run=True)
+    elif args.force:
+        print("🚀 强制模式，直接执行重构")
+        success = restructurer.run_restructure(dry_run=False, force=True)
     else:
         print("⚠️  即将开始项目重构，这将修改项目结构")
         if input("确认继续？(y/N): ").lower() == 'y':
