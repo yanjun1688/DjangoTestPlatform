@@ -516,7 +516,7 @@ class ApiTestService:
 class ApiDefinitionViewSet(viewsets.ModelViewSet):
     queryset = ApiDefinition.objects.all()
     serializer_class = ApiDefinitionSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 所有用户可以执行所有操作，不区分角色
 
     def perform_create(self, serializer):
         # 处理匿名用户的情况
@@ -527,7 +527,7 @@ class ApiDefinitionViewSet(viewsets.ModelViewSet):
 class ApiTestCaseViewSet(viewsets.ModelViewSet):
     queryset = ApiTestCase.objects.all()
     serializer_class = ApiTestCaseSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 所有用户可以执行所有操作，不区分角色
 
     def perform_create(self, serializer):
         # 处理匿名用户的情况
@@ -652,7 +652,7 @@ class ApiTestResultViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminOrReadOnly])  # 所有认证用户可访问，不区分角色
 def api_test_debug_log(request):
     log_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'debug.log')
     if not os.path.exists(log_path):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-统一测试管理脚本
+统一测试管理脚本 - Windows兼容版本
 
 提供便捷的测试执行、报告生成和测试管理功能
 """
@@ -25,7 +25,7 @@ try:
     DJANGO_AVAILABLE = True
 except ImportError:
     DJANGO_AVAILABLE = False
-    print("警告: 无法导入Django，部分功能不可用")
+    print("Warning: Django not available, some features disabled")
 
 
 class TestManager:
@@ -52,7 +52,7 @@ class TestManager:
         self.test_type_map = {
             'unit': [
                 'tests.api_test',
-                'tests.testcases',
+                'tests.testcases', 
                 'tests.user_management',
                 'tests.reports',
                 'tests.mock_server',
@@ -67,9 +67,10 @@ class TestManager:
     def list_tests(self, modules=None, test_type='all'):
         """列出可用的测试"""
         print(f"\n{'=' * 60}")
-        print(f"可用的测试模块")
+        print(f"Available Test Modules")
         print(f"{'=' * 60}\n")
         
+        # 确定要显示的模块
         if modules:
             selected_modules = [m for m in modules if m in self.module_map]
         else:
@@ -81,8 +82,8 @@ class TestManager:
         
         for module in selected_modules:
             module_path = self.module_map[module]
-            print(f"📁 {module}")
-            print(f"   路径: {module_path}")
+            print(f"[MODULE] {module}")
+            print(f"   Path: {module_path}")
             
             # 尝试列出测试文件
             try:
@@ -90,15 +91,15 @@ class TestManager:
                 if module_dir.exists():
                     test_files = list(module_dir.glob('test_*.py'))
                     if test_files:
-                        print(f"   测试文件:")
+                        print(f"   Test files:")
                         for test_file in test_files:
                             print(f"     - {test_file.name}")
                     else:
-                        print(f"   测试文件: 无")
+                        print(f"   Test files: None")
                 else:
-                    print(f"   状态: 目录不存在")
+                    print(f"   Status: Directory not found")
             except Exception as e:
-                print(f"   状态: 无法访问 ({e})")
+                print(f"   Status: Cannot access ({e})")
             
             print()
     
@@ -106,7 +107,7 @@ class TestManager:
         """运行测试"""
         
         print(f"\n{'=' * 60}")
-        print(f"Django测试平台 - 测试执行器")
+        print(f"Django Test Platform - Test Runner")
         print(f"{'=' * 60}\n")
         
         # 确定要运行的测试模块
@@ -116,53 +117,53 @@ class TestManager:
             test_modules = self.test_type_map.get(test_type, self.test_type_map['all'])
         
         if not test_modules:
-            print("❌ 没有找到匹配的测试模块")
+            print("[ERROR] No matching test modules found")
             return False
         
-        print(f"📋 测试配置:")
-        print(f"   - 测试类型: {test_type}")
-        print(f"   - 模块数量: {len(test_modules)}")
-        print(f"   - 详细程度: {verbosity}")
+        print(f"[CONFIG] Test Configuration:")
+        print(f"   - Test Type: {test_type}")
+        print(f"   - Module Count: {len(test_modules)}")
+        print(f"   - Verbosity: {verbosity}")
         
-        print(f"\n🎯 测试模块:")
+        print(f"\n[MODULES] Test Modules:")
         for module in test_modules:
             print(f"   - {module}")
         
         print(f"\n{'=' * 60}\n")
         
         if not DJANGO_AVAILABLE:
-            print("❌ Django不可用，无法运行测试")
+            print("[ERROR] Django not available, cannot run tests")
             return False
             
         try:
             # 使用Django test命令
             cmd_args = ['test'] + test_modules + ['--verbosity', str(verbosity)]
             call_command(*cmd_args)
-            print("\n✅ 测试执行完成!")
+            print("\n[SUCCESS] Test execution completed!")
             return True
         except SystemExit as e:
             success = e.code == 0
             if success:
-                print("\n✅ 测试执行完成!")
+                print("\n[SUCCESS] Test execution completed!")
             else:
-                print("\n❌ 测试执行失败!")
+                print("\n[FAILED] Test execution failed!")
             return success
         except Exception as e:
-            print(f"\n❌ 测试执行出错: {str(e)}")
+            print(f"\n[ERROR] Test execution error: {str(e)}")
             return False
 
 
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(
-        description='Django测试平台统一测试管理器',
+        description='Django Test Platform Unified Test Manager',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
-  python run_tests.py                           # 运行所有测试
-  python run_tests.py --type unit               # 运行单元测试
-  python run_tests.py --modules api_test        # 运行API测试模块
-  python run_tests.py --list                    # 列出所有可用测试
+Examples:
+  python run_tests.py                           # Run all tests
+  python run_tests.py --type unit               # Run unit tests
+  python run_tests.py --modules api_test        # Run API test module
+  python run_tests.py --list                    # List all available tests
         """
     )
     
@@ -170,14 +171,14 @@ def main():
         '--modules', '-m',
         nargs='+',
         choices=list(TestManager().module_map.keys()),
-        help='指定要运行的测试模块'
+        help='Specify test modules to run'
     )
     
     parser.add_argument(
         '--type', '-t',
         choices=['unit', 'integration', 'e2e', 'all'],
         default='all',
-        help='指定测试类型 (默认: all)'
+        help='Specify test type (default: all)'
     )
     
     parser.add_argument(
@@ -185,13 +186,13 @@ def main():
         type=int,
         choices=[0, 1, 2, 3],
         default=2,
-        help='输出详细程度 (默认: 2)'
+        help='Output verbosity level (default: 2)'
     )
     
     parser.add_argument(
         '--list', '-l',
         action='store_true',
-        help='列出可用的测试模块'
+        help='List available test modules'
     )
     
     args = parser.parse_args()

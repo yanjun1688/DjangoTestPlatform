@@ -36,59 +36,51 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
     
     if response is not None:
-        # DRF已处理的异常
-        custom_response_data = {
-            'error': True,
-            'code': 'DRF_ERROR',
-            'message': '请求处理失败',
-            'details': response.data,
-            'status_code': response.status_code
-        }
-        response.data = custom_response_data
+        # 保持DRF的标准错误格式，前端期望 detail 字段
+        # 但同时保留原有的复杂结构作为额外信息
+        original_data = response.data
+        
+        # 如果是权限错误，保持简单的 detail 格式
+        if response.status_code == 403:
+            response.data = {
+                'detail': '权限不足，无法访问此资源'
+            }
+        elif response.status_code == 401:
+            response.data = {
+                'detail': '身份验证失败，请登录后再试'
+            }
+        elif response.status_code == 404:
+            response.data = {
+                'detail': '请求的资源不存在'
+            }
+        else:
+            # 其他情况保持原有数据结构不变
+            pass
         
     else:
         # 未被DRF处理的异常
         if isinstance(exc, Http404):
-            custom_response_data = {
-                'error': True,
-                'code': APIError.NOT_FOUND[0],
-                'message': APIError.NOT_FOUND[1],
-                'details': str(exc),
-                'status_code': 404
-            }
-            response = Response(custom_response_data, status=status.HTTP_404_NOT_FOUND)
+            response = Response({
+                'detail': '请求的资源不存在'
+            }, status=status.HTTP_404_NOT_FOUND)
             
         elif isinstance(exc, PermissionDenied):
-            custom_response_data = {
-                'error': True,
-                'code': APIError.PERMISSION_DENIED[0],
-                'message': APIError.PERMISSION_DENIED[1],
-                'details': str(exc),
-                'status_code': 403
-            }
-            response = Response(custom_response_data, status=status.HTTP_403_FORBIDDEN)
+            response = Response({
+                'detail': '权限不足，无法访问此资源'
+            }, status=status.HTTP_403_FORBIDDEN)
             
         elif isinstance(exc, ValidationError):
-            custom_response_data = {
-                'error': True,
-                'code': APIError.VALIDATION_ERROR[0],
-                'message': APIError.VALIDATION_ERROR[1],
-                'details': exc.message_dict if hasattr(exc, 'message_dict') else str(exc),
-                'status_code': 400
-            }
-            response = Response(custom_response_data, status=status.HTTP_400_BAD_REQUEST)
+            response = Response({
+                'detail': '数据验证失败',
+                'errors': exc.message_dict if hasattr(exc, 'message_dict') else str(exc)
+            }, status=status.HTTP_400_BAD_REQUEST)
             
         else:
             # 记录未处理的异常
             logger.exception('Unhandled exception occurred', exc_info=exc)
-            custom_response_data = {
-                'error': True,
-                'code': APIError.UNKNOWN_ERROR[0],
-                'message': APIError.UNKNOWN_ERROR[1],
-                'details': str(exc) if hasattr(exc, '__str__') else '服务器内部错误',
-                'status_code': 500
-            }
-            response = Response(custom_response_data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            response = Response({
+                'detail': '服务器内部错误，请稍后再试'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     return response
 

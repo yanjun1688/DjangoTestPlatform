@@ -2,21 +2,19 @@ from rest_framework import permissions
 
 class IsAdminUser(permissions.BasePermission):
     """
-    只允许管理员访问
+    所有认证用户都可以访问，不限制管理员
     """
     def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.is_admin
+        # 只需要用户已认证即可
+        return request.user and request.user.is_authenticated
 
 class IsAdminOrSelf(permissions.BasePermission):
     """
-    管理员可以访问所有用户，普通用户只能访问自己的信息
+    所有认证用户都可以访问
     """
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        # 管理员可以访问所有用户
-        if request.user.is_admin:
-            return True
-        # 普通用户只能访问自己的信息
-        return obj == request.user 
+        # 所有认证用户都可以访问任意用户的信息
+        return True 

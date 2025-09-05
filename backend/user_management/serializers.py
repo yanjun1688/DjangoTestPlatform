@@ -6,15 +6,20 @@ class UserSerializer(serializers.ModelSerializer):
     """用户序列化器"""
     role_display = serializers.CharField(source='get_role_display', read_only=True)
     password = serializers.CharField(write_only=True, required=False)
+    is_admin = serializers.SerializerMethodField()
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'role', 'role_display', 'phone', 'department', 'is_active',
-            'created_at', 'updated_at', 'password'
+            'created_at', 'updated_at', 'password', 'is_admin'
         ]
         read_only_fields = ['created_at', 'updated_at']
+    
+    def get_is_admin(self, obj):
+        """判断用户是否为管理员"""
+        return obj.role == 'admin'
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)

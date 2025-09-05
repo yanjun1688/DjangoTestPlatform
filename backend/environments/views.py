@@ -16,7 +16,7 @@ from testcases.permissions import IsAdminOrReadOnly
 
 class EnvironmentViewSet(viewsets.ModelViewSet):
     """环境管理ViewSet"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]  # 使用统一的权限控制
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active', 'is_default']
     search_fields = ['name', 'description']
@@ -158,7 +158,7 @@ class EnvironmentViewSet(viewsets.ModelViewSet):
 class EnvironmentVariableViewSet(viewsets.ModelViewSet):
     """环境变量管理ViewSet"""
     serializer_class = EnvironmentVariableSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrReadOnly]  # 使用统一的权限控制
 
     def get_queryset(self):
         """获取当前用户环境的变量"""

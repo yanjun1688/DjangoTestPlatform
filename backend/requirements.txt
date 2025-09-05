@@ -1,7 +1,41 @@
+# Django 核心框架
 Django==4.2.11
 djangorestframework==3.14.0
+
+# Django 扩展
 django-reversion==5.0.1
 django-mptt==0.16.0
-requests==2.31.0
 django-cors-headers==4.3.1
+django-filter==23.5
+
+# 环境配置
 python-dotenv==1.0.1
+
+# HTTP 请求库
+requests==2.31.0
+
+# 测试框架
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+factory-boy==3.3.0
+faker==21.0.0
+
+# 代码质量
+flake8==6.1.0
+black==23.11.0
+
+# 开发工具
+ipython==8.18.1
+ipdb==0.13.13
+
+# API文档
+drf-spectacular==0.27.0
+
+# 数据库（生产环境）
+psycopg2-binary==2.9.9
+
+# 部署相关
+gunicorn==21.2.0
+whitenoise==6.6.0

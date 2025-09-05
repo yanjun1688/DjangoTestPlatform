@@ -169,7 +169,7 @@ class ServeMockAPIView(View):
 class MockAPIViewSet(viewsets.ModelViewSet):
     """Mock API管理ViewSet"""
     queryset = MockAPI.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # 空权限列表，允许所有用户访问
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['method', 'response_status_code', 'is_active']
     search_fields = ['name', 'path', 'description']
@@ -310,7 +310,7 @@ class MockAPIUsageLogViewSet(viewsets.ReadOnlyModelViewSet):
     """Mock API使用日志ViewSet"""
     queryset = MockAPIUsageLog.objects.all()
     serializer_class = MockAPIUsageLogSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # 空权限列表，允许所有用户访问
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['mock_api', 'request_method', 'response_status_code']
     search_fields = ['request_path', 'client_ip']

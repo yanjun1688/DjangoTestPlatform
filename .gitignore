@@ -337,4 +337,21 @@ test-results.json
 
 # Database backups
 *.db.backup
-*.sqlite3.backup 
+*.sqlite3.backup
+
+# Debug and test scripts (temporary)
+test_*.py
+debug_*.py
+create_admin_user.py
+
+# Temporary reports and documentation
+*_test_report.json
+*_api_test_report.json
+BACKEND_API_INTEGRATION_TEST_REPORT.md
+TECHNICAL_ISSUES_TODO.md
+permission_fix_test_report.json
+backend_api_test_report.json
+
+# Unit test reports
+backend/UNIT_TEST_*.md
+backend/TEST_*.md

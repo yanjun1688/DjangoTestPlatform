@@ -5,17 +5,17 @@ import './DashboardPage.css';
 import BackButton from '../components/BackButton';
 
 const features = [
+  { key: 'users', title: '用户管理', desc: '管理平台用户（仅管理员）', path: '/user-management', icon: '👥', admin: true },
+  { key: 'environments', title: '环境管理', desc: '管理测试环境和变量', path: '/environments', icon: '🌍' },
+  { key: 'api', title: 'API定义', desc: '管理API接口定义', path: '/api-definitions', icon: '🔗' },
   { key: 'testcases', title: '测试用例', desc: '管理和执行API测试用例', path: '/test-cases', icon: '📝' },
   { key: 'interactive-editor', title: '交互式编辑器', desc: '三窗格交互式测试用例编辑器', path: '/interactive-editor', icon: '🎯' },
-  { key: 'results', title: '测试结果', desc: '查看测试执行结果', path: '/test-results', icon: '📊' },
-  { key: 'api', title: 'API定义', desc: '管理API接口定义', path: '/api-definitions', icon: '🔗' },
   { key: 'testplans', title: '测试计划', desc: '管理测试计划和历史报告', path: '/test-plans', icon: '📋' },
   { key: 'workflow', title: '流程编排', desc: '设计和管理测试工作流程', path: '/workflow-orchestration', icon: '🔄' },
-  { key: 'reports', title: '测试报告', desc: '查看可视化测试报告', path: '/reports', icon: '📈' },
   { key: 'mock', title: 'Mock Server', desc: '创建和管理Mock API接口', path: '/mock-server', icon: '🔄' },
-  { key: 'environments', title: '环境管理', desc: '管理测试环境和变量', path: '/environments', icon: '🌍' },
+  { key: 'results', title: '测试结果', desc: '查看测试执行结果', path: '/test-results', icon: '📊' },
+  { key: 'reports', title: '测试报告', desc: '查看可视化测试报告', path: '/reports', icon: '📈' },
   { key: 'debug', title: '调试日志', desc: '查看接口调试日志', path: '/debug', icon: '🐛' },
-  { key: 'users', title: '用户管理', desc: '管理平台用户（仅管理员）', path: '/user-management', icon: '👥', admin: true },
 ];
 
 const DashboardPage = ({ user }) => {
