@@ -28,4 +28,12 @@ coverage/
 *.swo
 
 # System
-Thumbs.db.claude/ 
+Thumbs.db
+.claude/
+
+# Archive
+archive/
+
+# Test files
+test-results.json
+*.test.log 

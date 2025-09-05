@@ -11,21 +11,26 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 加载环境变量
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-51*vr8@mb)b-q((mkoe4lvs3$$r$djkpyd$4_wh=xo_25%8=&('
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-only-for-development')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'testserver,127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -55,7 +60,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',  # 临时禁用CSRF用于调试
+    'django.middleware.csrf.CsrfViewMiddleware',  # 启用CSRF保护
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -81,15 +86,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'test_platform.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# 数据库配置 - 支持多种数据库
+if os.getenv('DATABASE_ENGINE') == 'django.db.backends.postgresql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DATABASE_NAME', 'test_platform_db'),
+            'USER': os.getenv('DATABASE_USER', ''),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD', ''),
+            'HOST': os.getenv('DATABASE_HOST', 'localhost'),
+            'PORT': os.getenv('DATABASE_PORT', '5432'),
+        }
     }
-}
+else:
+    # 默认使用SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / os.getenv('DATABASE_NAME', 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -133,12 +149,27 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 允许所有跨域请求
+# REST Framework配置
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # 临时设置为AllowAny用于调试
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'EXCEPTION_HANDLER': 'api_test.error_handlers.custom_exception_handler',
+}
+
+# 跨域配置
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',')
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_HEADERS = [
     'accept',
@@ -151,10 +182,7 @@ CORS_ALLOWED_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',')
 
 LOGGING = {
     'version': 1,
@@ -210,24 +238,6 @@ LOGGING = {
 
 # 自定义用户模型
 AUTH_USER_MODEL = 'user_management.User'
-
-# REST Framework 配置
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # 临时设置为AllowAny用于调试
-    ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 20,
-    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
-}
 
 # CSRF 配置
 CSRF_COOKIE_HTTPONLY = False

@@ -73,7 +73,7 @@ const AppContent = () => {
         setUser(response.data.user);
       }
     } catch (error) {
-      console.log('Auth check failed:', error);
+      // 认证检查失败，重定向到登录页
       setUser(null);
     } finally {
       setLoading(false);

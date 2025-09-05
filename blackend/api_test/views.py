@@ -11,12 +11,19 @@ from .serializers import (
     ApiDefinitionSerializer, ApiTestCaseSerializer,
     ApiTestResultSerializer
 )
+from .error_handlers import (
+    handle_request_exception, create_error_result, 
+    TestExecutionError, APIError
+)
 from testcases.permissions import IsAdminOrReadOnly
 from testcases.models import TestDataFile
 from rest_framework.permissions import IsAdminUser
 from environments.models import Environment
 from environments.views import log_environment_usage
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ApiTestService:
     """API测试执行服务"""

@@ -174,12 +174,12 @@ class TestRun(models.Model):
     
     @property
     def avg_response_time(self):
-        """平均响应时间"""
-        results = self.results.filter(response_time__isnull=False)
-        if not results.exists():
-            return 0
-        response_times = [result.response_time for result in results]
-        return sum(response_times) / len(response_times)
+        """平均响应时间 - 优化查询性能"""
+        from django.db.models import Avg
+        result = self.results.filter(response_time__isnull=False).aggregate(
+            avg_time=Avg('response_time')
+        )
+        return result['avg_time'] or 0
     
     @property
     def is_running(self):
@@ -187,13 +187,22 @@ class TestRun(models.Model):
         return self.status == 'running'
     
     def update_statistics(self):
-        """更新统计信息"""
-        results = self.results.all()
-        self.total_tests = results.count()
-        self.passed_tests = results.filter(status='passed').count()
-        self.failed_tests = results.filter(status='failed').count()
-        self.error_tests = results.filter(status='error').count()
-        self.save()
+        """更新统计信息 - 优化查询性能"""
+        from django.db.models import Count, Q
+        
+        # 使用聚合查询一次性获取所有统计信息
+        stats = self.results.aggregate(
+            total=Count('id'),
+            passed=Count('id', filter=Q(status='passed')),
+            failed=Count('id', filter=Q(status='failed')),
+            error=Count('id', filter=Q(status='error'))
+        )
+        
+        self.total_tests = stats['total']
+        self.passed_tests = stats['passed']
+        self.failed_tests = stats['failed']
+        self.error_tests = stats['error']
+        self.save(update_fields=['total_tests', 'passed_tests', 'failed_tests', 'error_tests'])
     
     def complete(self):
         """标记执行完成"""

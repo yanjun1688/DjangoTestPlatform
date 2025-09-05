@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   server: {
     proxy: {
@@ -13,6 +13,20 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/setupTests.js', // a new file we will create
+    setupFiles: './src/setupTests.js',
   },
-})
+  build: {
+    // 生产环境移除console语句
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+      },
+    },
+  },
+  esbuild: {
+    // 开发环境保留console，生产环境移除
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
+}))

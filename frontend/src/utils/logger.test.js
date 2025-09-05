@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { logger } from './logger';
+import Logger from './logger';
 
 describe('Logger', () => {
   beforeEach(() => {
@@ -17,7 +17,7 @@ describe('Logger', () => {
   });
 
   it('should log debug messages', () => {
-    logger.debug('Test debug message');
+    Logger.debug('Test debug message');
     
     expect(console.log).toHaveBeenCalledWith(
       expect.stringContaining('[DEBUG]'),
@@ -26,7 +26,7 @@ describe('Logger', () => {
   });
 
   it('should log info messages', () => {
-    logger.info('Test info message');
+    Logger.info('Test info message');
     
     expect(console.log).toHaveBeenCalledWith(
       expect.stringContaining('[INFO]'),
@@ -35,7 +35,7 @@ describe('Logger', () => {
   });
 
   it('should log warning messages', () => {
-    logger.warn('Test warning message');
+    Logger.warn('Test warning message');
     
     expect(console.warn).toHaveBeenCalledWith(
       expect.stringContaining('[WARN]'),
@@ -44,7 +44,7 @@ describe('Logger', () => {
   });
 
   it('should log error messages', () => {
-    logger.error('Test error message');
+    Logger.error('Test error message');
     
     expect(console.error).toHaveBeenCalledWith(
       expect.stringContaining('[ERROR]'),
@@ -53,7 +53,7 @@ describe('Logger', () => {
   });
 
   it('should store logs in localStorage', () => {
-    logger.info('Test storage message');
+    Logger.info('Test storage message');
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
     expect(storedLogs).toHaveLength(1);
@@ -67,7 +67,7 @@ describe('Logger', () => {
   it('should limit the number of stored logs', () => {
     // Add more logs than the limit
     for (let i = 0; i < 1500; i++) {
-      logger.info(`Test message ${i}`);
+      Logger.info(`Test message ${i}`);
     }
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
@@ -79,7 +79,7 @@ describe('Logger', () => {
 
   it('should include context information in logs', () => {
     const context = { userId: 123, action: 'login' };
-    logger.info('User action', context);
+    Logger.info('User action', context);
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
     expect(storedLogs[0]).toMatchObject({
@@ -91,10 +91,10 @@ describe('Logger', () => {
   });
 
   it('should get logs from localStorage', () => {
-    logger.info('Test message 1');
-    logger.error('Test message 2');
+    Logger.info('Test message 1');
+    Logger.error('Test message 2');
     
-    const logs = logger.getLogs();
+    const logs = Logger.getLogs();
     expect(logs).toHaveLength(2);
     expect(logs[0]).toMatchObject({
       level: 'INFO',
@@ -107,11 +107,11 @@ describe('Logger', () => {
   });
 
   it('should clear logs from localStorage', () => {
-    logger.info('Test message');
-    expect(logger.getLogs()).toHaveLength(1);
+    Logger.info('Test message');
+    expect(Logger.getLogs()).toHaveLength(1);
     
-    logger.clearLogs();
-    expect(logger.getLogs()).toHaveLength(0);
+    Logger.clearLogs();
+    expect(Logger.getLogs()).toHaveLength(0);
     expect(localStorage.getItem('debug_logs')).toBeNull();
   });
 
@@ -123,7 +123,7 @@ describe('Logger', () => {
     });
     
     // Should not throw an error
-    expect(() => logger.info('Test message')).not.toThrow();
+    expect(() => Logger.info('Test message')).not.toThrow();
     
     // Restore original method
     localStorage.setItem = originalSetItem;
@@ -131,7 +131,7 @@ describe('Logger', () => {
 
   it('should format timestamps correctly', () => {
     const now = new Date();
-    logger.info('Test timestamp');
+    Logger.info('Test timestamp');
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
     const logTimestamp = new Date(storedLogs[0].timestamp);
@@ -150,14 +150,14 @@ describe('Logger', () => {
       array: [1, 2, 3]
     };
     
-    logger.info('Complex context', context);
+    Logger.info('Complex context', context);
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
     expect(storedLogs[0].context).toEqual(context);
   });
 
   it('should work without context parameter', () => {
-    logger.info('Message without context');
+    Logger.info('Message without context');
     
     const storedLogs = JSON.parse(localStorage.getItem('debug_logs') || '[]');
     expect(storedLogs[0]).toMatchObject({

@@ -2,7 +2,7 @@ import axios from 'axios';
 import Logger from './logger';
 import API_CONFIG from '../config/api';
 
-// 获取cookie中的csrftoken
+// 获取CSRF token
 function getCookie(name) {
   let cookieValue = null;
   if (document.cookie && document.cookie !== '') {
@@ -18,6 +18,11 @@ function getCookie(name) {
   return cookieValue;
 }
 
+// 获取CSRF token
+function getCSRFToken() {
+  return getCookie(API_CONFIG.CSRF_COOKIE_NAME);
+}
+
 // 创建axios实例
 const api = axios.create({
   baseURL: API_CONFIG.BASE_URL,
@@ -29,13 +34,19 @@ const api = axios.create({
 // 请求拦截器，自动加CSRF token
 api.interceptors.request.use(
   (config) => {
+    // 为非安全方法添加CSRF token
     if (['post', 'put', 'patch', 'delete'].includes(config.method)) {
-      const csrftoken = getCookie('csrftoken');
+      const csrftoken = getCSRFToken();
       if (csrftoken) {
-        config.headers['X-CSRFToken'] = csrftoken;
+        config.headers[API_CONFIG.CSRF_HEADER_NAME] = csrftoken;
       }
     }
-    Logger.apiRequest(config.method?.toUpperCase(), config.url, config.data);
+    
+    // 记录请求日志（仅在开发环境）
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      Logger.apiRequest(config.method?.toUpperCase(), config.url, config.data);
+    }
+    
     return config;
   },
   (error) => {
@@ -47,21 +58,33 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    Logger.apiResponse(
-      response.config.method?.toUpperCase(),
-      response.config.url,
-      response.status,
-      response.data
-    );
+    // 记录响应日志（仅在开发环境）
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      Logger.apiResponse(
+        response.config.method?.toUpperCase(),
+        response.config.url,
+        response.status,
+        response.data
+      );
+    }
     return response;
   },
   (error) => {
-    Logger.apiResponse(
-      error.config?.method?.toUpperCase(),
-      error.config?.url,
-      error.response?.status || 'NETWORK_ERROR',
-      error.response?.data
-    );
+    // 记录错误日志
+    if (API_CONFIG.IS_DEVELOPMENT) {
+      Logger.apiResponse(
+        error.config?.method?.toUpperCase(),
+        error.config?.url,
+        error.response?.status || 'NETWORK_ERROR',
+        error.response?.data
+      );
+    }
+    
+    // 统一错误处理
+    if (error.response?.status === 403) {
+      console.warn('CSRF token may be invalid, please refresh the page');
+    }
+    
     return Promise.reject(error);
   }
 );
