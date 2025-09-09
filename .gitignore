@@ -355,3 +355,23 @@ backend_api_test_report.json
 # Unit test reports
 backend/UNIT_TEST_*.md
 backend/TEST_*.md
+
+# Temporary technical documents
+REMAINING_TECHNICAL_ISSUES_TODO.md
+TECHNICAL_ISSUES_FIXED_REPORT.md
+TEST_EXECUTOR_CONSOLIDATION_REPORT.md
+
+# Test reports and cleanup documents
+backend/tests/CLEANUP_REPORT.md
+backend/tests/CONSOLIDATION_REPORT.md
+backend/tests/README.md
+backend/tests/QUICK_START.md
+
+# Archive folders
+archive/
+archives/
+
+# Changelog and update logs
+CHANGELOG.md
+UPDATE_LOG.md
+*_UPDATE_LOG.md

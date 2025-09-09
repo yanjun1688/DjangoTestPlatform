@@ -15,9 +15,7 @@ from .error_handlers import (
     handle_request_exception, create_error_result, 
     TestExecutionError, APIError
 )
-from testcases.permissions import IsAdminOrReadOnly
 from testcases.models import TestDataFile
-from rest_framework.permissions import IsAdminUser
 from environments.models import Environment
 from environments.views import log_environment_usage
 import re
@@ -514,7 +512,7 @@ class ApiTestService:
 
 
 class ApiDefinitionViewSet(viewsets.ModelViewSet):
-    queryset = ApiDefinition.objects.all()
+    queryset = ApiDefinition.objects.all().select_related('created_by').order_by('-created_at')
     serializer_class = ApiDefinitionSerializer
     permission_classes = []  # 所有用户可以执行所有操作，不区分角色
 
@@ -525,7 +523,7 @@ class ApiDefinitionViewSet(viewsets.ModelViewSet):
 
 
 class ApiTestCaseViewSet(viewsets.ModelViewSet):
-    queryset = ApiTestCase.objects.all()
+    queryset = ApiTestCase.objects.all().select_related('api', 'created_by').prefetch_related('results').order_by('-created_at')
     serializer_class = ApiTestCaseSerializer
     permission_classes = []  # 所有用户可以执行所有操作，不区分角色
 
@@ -637,7 +635,7 @@ class ApiTestCaseViewSet(viewsets.ModelViewSet):
 class ApiTestResultViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ApiTestResult.objects.all().order_by('-executed_at')
     serializer_class = ApiTestResultSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 统一权限配置：不限制访问
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -652,13 +650,36 @@ class ApiTestResultViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 @api_view(['GET'])
-@permission_classes([IsAdminOrReadOnly])  # 所有认证用户可访问，不区分角色
+@permission_classes([])  # 统一权限配置：不限制访问
 def api_test_debug_log(request):
     log_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'debug.log')
     if not os.path.exists(log_path):
         return Response({'log': ''})
-    with open(log_path, encoding='utf-8') as f:
-        lines = f.readlines()
+    
+    # 尝试多种编码格式读取日志文件
+    content = None
+    encodings = ['utf-8', 'gbk', 'gb2312', 'latin-1', 'utf-16']
+    
+    for encoding in encodings:
+        try:
+            with open(log_path, encoding=encoding) as f:
+                lines = f.readlines()
+            content = lines
+            break
+        except (UnicodeDecodeError, UnicodeError):
+            continue
+        except Exception as e:
+            # 处理其他可能的文件读取错误
+            continue
+    
+    if content is None:
+        return Response({'log': '日志文件编码错误，无法读取。请检查日志文件格式。'})
+    
     # 只返回包含api_test关键字的日志
-    api_test_lines = [line for line in lines if 'api_test' in line or 'API测试' in line or 'TestCase' in line]
-    return Response({'log': ''.join(api_test_lines)[-10000:]})  # 最多返回最后10000字符
+    try:
+        api_test_lines = [line for line in content if 'api_test' in line or 'API测试' in line or 'TestCase' in line]
+        log_content = ''.join(api_test_lines)[-10000:]  # 最多返回最后10000字符
+    except Exception as e:
+        log_content = f'处理日志内容时出错: {str(e)}'
+    
+    return Response({'log': log_content})

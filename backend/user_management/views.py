@@ -139,12 +139,12 @@ class LogoutView(APIView):
 
 class UserLoginLogViewSet(viewsets.ReadOnlyModelViewSet):
     """登录日志视图集"""
-    queryset = UserLoginLog.objects.all()
+    queryset = UserLoginLog.objects.all().select_related('user').order_by('-login_time')
     serializer_class = UserLoginLogSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
-        queryset = UserLoginLog.objects.all()
+        queryset = UserLoginLog.objects.all().select_related('user')
         
         # 用户过滤
         user_id = self.request.query_params.get('user_id', None)

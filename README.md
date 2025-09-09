@@ -3,14 +3,17 @@
 <div align="center">
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
-![Django](https://img.shields.io/badge/Django-5.2+-green.svg)
+![Django](https://img.shields.io/badge/Django-4.2+-green.svg)
 ![React](https://img.shields.io/badge/React-18+-lightblue.svg)
-![Tests](https://img.shields.io/badge/Tests-180%20passed-brightgreen.svg)
+![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Build](https://img.shields.io/badge/Build-Stable-success.svg)
 
-**企业级API测试平台 - 完整的测试解决方案**
+**🚀 现代化企业级API测试管理平台**
 
-[快速开始](#-快速开始) • [功能特性](#-功能特性) • [技术栈](#️-技术栈) • [部署](#-部署)
+*集API定义、测试用例管理、自动化执行、报告分析于一体的完整测试解决方案*
+
+[快速开始](#-快速开始) • [功能特性](#-功能特性) • [技术栈](#️-技术栈) • [部署指南](#-部署指南) • [API文档](#-api文档)
 
 </div>
 
@@ -119,16 +122,34 @@ DjangoTestPlatform/
 ## 🛠️ 技术栈
 
 ### 后端技术
-- **框架**: Django 5.2 + Django REST Framework
+- **框架**: Django 4.2 + Django REST Framework 3.14
 - **数据库**: SQLite (开发) / PostgreSQL (生产)
-- **测试**: 180个单元测试用例，100%通过率
-- **特性**: MPTT树形结构、版本控制、权限管理
+- **树形结构**: django-mptt 0.16.0 (MPTT算法)
+- **跨域处理**: django-cors-headers 4.3.1
+- **版本控制**: django-reversion 5.0.1
+- **环境配置**: python-dotenv 1.0.1
+- **HTTP请求**: requests 2.31.0
+- **测试框架**: pytest + pytest-django + factory-boy
+- **代码质量**: flake8 + black
+- **API文档**: drf-spectacular 0.27.0
+- **生产部署**: gunicorn + whitenoise
 
 ### 前端技术
-- **框架**: React 18 + TypeScript
-- **构建**: Vite
-- **UI库**: Ant Design
-- **状态管理**: Redux Toolkit
+- **框架**: React 18.3 + Vite 6.1
+- **UI库**: Ant Design 5.25 + @ant-design/icons 6.0
+- **路由**: React Router DOM 6.0
+- **HTTP客户端**: Axios 1.9
+- **图表库**: Chart.js 4.4 + react-chartjs-2 5.2
+- **拖拽**: React Beautiful DnD 13.1
+- **工具**: prop-types + browserslist + bootstrap
+- **开发工具**: ESLint 9.19 + Vitest 2.0 + jsdom
+
+### 开发与测试
+- **测试覆盖**: 单元测试 + 集成测试 + 端到端测试
+- **代码规范**: ESLint + Black + Flake8
+- **版本控制**: Git + GitHub
+- **环境隔离**: Python虚拟环境 + Node.js包管理
+- **构建工具**: Vite (前端) + Django管理命令 (后端)
 
 ## 📊 系统统计
 
@@ -138,34 +159,117 @@ DjangoTestPlatform/
 - **🧪 测试覆盖**: 180个测试用例
 - **📝 代码量**: ~15,000行
 
-## 🚀 部署
+## 🚀 部署指南
 
-### 开发环境
+### 快速启动脚本
 ```bash
-# 后端
+# Windows 用户
+scripts\dev\quick-start.bat
+
+# Linux/macOS 用户
+chmod +x scripts/dev/quick-start.sh
+./scripts/dev/quick-start.sh
+```
+
+### 手动部署
+
+#### 开发环境
+```bash
+# 1. 后端服务
 cd backend
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # Linux/macOS
+
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 
-# 前端
+# 2. 前端服务 (新终端)
 cd frontend
+npm install
 npm run dev
 ```
 
-### 生产环境
+#### 生产环境
 ```bash
-# 使用Docker
-docker-compose up -d
+# 使用Gunicorn + Nginx
+cd backend
+pip install -r requirements.txt
+python manage.py collectstatic
+python manage.py migrate
+gunicorn test_platform.wsgi:application --bind 0.0.0.0:8000
 
-# 或手动部署
-# 参考 docs/deployment/README.md
+# 前端构建
+cd frontend
+npm run build
+# 将 dist/ 目录部署到 Nginx 静态文件服务器
 ```
 
-## 📚 文档
+### 环境检查
+```bash
+# 检查系统环境
+python scripts/utils/check-environment.py
 
-- [📋 功能清单](backend/BACKEND_FUNCTION_LIST.md) - 完整功能列表
-- [🧪 测试报告](backend/UNIT_TEST_EXECUTION_REPORT.md) - 测试执行结果
-- [📊 测试总结](backend/TEST_SUMMARY.md) - 测试覆盖分析
-- [🔄 更新日志](CHANGELOG.md) - 版本变更记录
+# 验证TDD设置
+python scripts/dev/verify_tdd_setup.py
+```
+
+## 📚 文档与资源
+
+- [📄 项目文档](docs/) - 完整的项目文档
+- [🛠️ API文档](http://localhost:8000/api/schema/swagger-ui/) - 交互式API文档
+- [🧪 测试指南](backend/tests/) - 测试执行指南
+- [📊 架构设计](docs/development/ARCHITECTURE.md) - 系统架构设计
+- [🚀 部署指南](docs/deployment/) - 生产部署详细指南
+
+## 🔧 常见问题
+
+<details>
+<summary><b>🔴 端口占用问题</b></summary>
+
+**问题**: `Error: That port is already in use`
+
+**解决方案**:
+```bash
+# Windows
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+
+# Linux/macOS
+lsof -i :8000
+kill -9 <PID>
+```
+</details>
+
+<details>
+<summary><b>🔴 依赖安装失败</b></summary>
+
+**Python依赖**:
+```bash
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+**Node.js依赖**:
+```bash
+rm -rf node_modules package-lock.json
+npm cache clean --force
+npm install
+```
+</details>
+
+<details>
+<summary><b>🔴 数据库问题</b></summary>
+
+**重置数据库**:
+```bash
+cd backend
+rm db.sqlite3
+python manage.py migrate
+python manage.py createsuperuser
+```
+</details>
 
 ## 🤝 贡献
 

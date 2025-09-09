@@ -1,4 +1,5 @@
 from rest_framework import viewsets, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -11,12 +12,11 @@ from .serializers import (
     EnvironmentVariableSerializer, EnvironmentVariableCreateSerializer,
     EnvironmentUsageLogSerializer
 )
-from testcases.permissions import IsAdminOrReadOnly
 
 
 class EnvironmentViewSet(viewsets.ModelViewSet):
     """环境管理ViewSet"""
-    permission_classes = [IsAdminOrReadOnly]  # 使用统一的权限控制
+    permission_classes = []  # 统一权限配置：不限制访问
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['is_active', 'is_default']
     search_fields = ['name', 'description']
@@ -25,7 +25,9 @@ class EnvironmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """获取当前用户的环境列表"""
-        return Environment.objects.filter(created_by=self.request.user)
+        return Environment.objects.filter(
+            created_by=self.request.user
+        ).select_related('created_by').prefetch_related('variables')
 
     def get_serializer_class(self):
         """根据操作选择序列化器"""
@@ -158,13 +160,13 @@ class EnvironmentViewSet(viewsets.ModelViewSet):
 class EnvironmentVariableViewSet(viewsets.ModelViewSet):
     """环境变量管理ViewSet"""
     serializer_class = EnvironmentVariableSerializer
-    permission_classes = [IsAdminOrReadOnly]  # 使用统一的权限控制
+    permission_classes = []  # 统一权限配置：不限制访问
 
     def get_queryset(self):
         """获取当前用户环境的变量"""
         return EnvironmentVariable.objects.filter(
             environment__created_by=self.request.user
-        )
+        ).select_related('environment')
 
     def get_serializer_class(self):
         """根据操作选择序列化器"""

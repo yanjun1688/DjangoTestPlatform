@@ -34,6 +34,11 @@ class TestCase(MPTTModel):
 
     class MPTTMeta:
         order_insertion_by = ['title']
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '测试用例'
+        verbose_name_plural = '测试用例'
 
     def __str__(self):
         return self.title
@@ -52,6 +57,11 @@ class TestPlan(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '测试计划'
+        verbose_name_plural = '测试计划'
 
     def __str__(self):
         return self.name

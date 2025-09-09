@@ -5,19 +5,17 @@ from django.db import models
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from api_test.models import TestRun, ApiTestResult
 from .serializers import (
     TestRunListSerializer, TestRunDetailSerializer, 
     TestRunCreateSerializer, ApiTestResultDetailSerializer
 )
-from testcases.permissions import IsAdminOrReadOnly
 
 
 class TestRunViewSet(viewsets.ModelViewSet):
     """测试执行记录视图集"""
     queryset = TestRun.objects.all()
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 统一权限配置：不限制访问
     
     def get_serializer_class(self):
         if self.action == 'list':

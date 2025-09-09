@@ -3,20 +3,18 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import Http404
 from .models import TestCase, TestPlan, TestDataFile
 from .serializers import (
     TestCaseSerializer, TestPlanSerializer, 
     TestDataFileSerializer, TestDataFileUploadSerializer
 )
-from .permissions import IsAdminOrReadOnly
 
 # Create your views here.
 
 class TestCaseViewSet(viewsets.ModelViewSet):
-    queryset = TestCase.objects.all()
+    queryset = TestCase.objects.all().select_related('assignee').prefetch_related('plans')
     serializer_class = TestCaseSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 统一权限配置：不限制访问
 
     @action(detail=True, methods=['post'], parser_classes=[MultiPartParser, FormParser])
     def datafile(self, request, pk=None):
@@ -119,15 +117,15 @@ class TestCaseViewSet(viewsets.ModelViewSet):
             )
 
 class TestPlanViewSet(viewsets.ModelViewSet):
-    queryset = TestPlan.objects.all()
+    queryset = TestPlan.objects.all().select_related('assignee').prefetch_related('test_cases')
     serializer_class = TestPlanSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 统一权限配置：不限制访问
 
 class TestDataFileViewSet(viewsets.ModelViewSet):
     """数据文件管理视图集"""
-    queryset = TestDataFile.objects.all()
+    queryset = TestDataFile.objects.all().select_related('test_case')
     serializer_class = TestDataFileSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []  # 统一权限配置：不限制访问
     parser_classes = [MultiPartParser, FormParser]
 
     def get_serializer_class(self):

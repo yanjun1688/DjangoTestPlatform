@@ -24,6 +24,11 @@ class ApiDefinition(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '接口定义'
+        verbose_name_plural = '接口定义'
+
     def __str__(self):
         return f"{self.method} {self.name}"
 
@@ -64,6 +69,11 @@ class ApiTestCase(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='api_test_cases')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = '接口测试用例'
+        verbose_name_plural = '接口测试用例'
 
     def __str__(self):
         return self.name
@@ -246,6 +256,11 @@ class ApiTestResult(models.Model):
     assertion_results = models.TextField(default='[]', verbose_name='断言结果详情', help_text='JSON格式')
     executed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='api_test_results')
     executed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-executed_at']
+        verbose_name = '接口测试结果'
+        verbose_name_plural = '接口测试结果'
 
     def __str__(self):
         return f"{self.test_case.name} - {self.status}"
